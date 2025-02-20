@@ -1,7 +1,7 @@
 # Dish Dex API
 
 ## Overview
-The DishDex API is a Spring Boot-based RESTful API that allows users to manage recipes and their ingredients. Users can create, retrieve, update, and delete recipes, as well as manage associated ingredients.
+The DishDex API is a Spring Boot-based RESTful API that allows users to manage recipes. Users can create, retrieve, update, and delete recipes, as well as manage associated ingredients.
 
 ## Features
 - CRUD operations for Recipes
@@ -47,11 +47,7 @@ Ensure you have the following installed:
 - PostgreSQL (or any preferred database)
 
 ### Steps to Run Locally
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/yourusername/dishdex-api.git
-   cd recipe-api
-   ```
+1. Clone the repository
 2. Configure the database in `application.yml`:
    ```yaml
    spring:
