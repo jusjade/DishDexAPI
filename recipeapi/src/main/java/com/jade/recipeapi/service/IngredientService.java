@@ -6,8 +6,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jade.recipeapi.Ingredient;
-import com.jade.recipeapi.Recipe;
+import com.jade.recipeapi.model.Ingredient;
+import com.jade.recipeapi.model.Recipe;
 import com.jade.recipeapi.repo.IngredientRepository;
 import com.jade.recipeapi.repo.RecipeRepository;
 
@@ -62,4 +62,6 @@ public class IngredientService {
             throw new RuntimeException("Ingredient not found with ID: " + ingredientId);
         }
     }
+
+
 }

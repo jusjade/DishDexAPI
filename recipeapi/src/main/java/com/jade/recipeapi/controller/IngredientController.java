@@ -1,6 +1,6 @@
 package com.jade.recipeapi.controller;
 
-import com.jade.recipeapi.Ingredient;
+import com.jade.recipeapi.model.Ingredient;
 import com.jade.recipeapi.service.IngredientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

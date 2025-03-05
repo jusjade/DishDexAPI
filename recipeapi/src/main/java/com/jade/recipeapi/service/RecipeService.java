@@ -1,15 +1,21 @@
 package com.jade.recipeapi.service;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
 
+import com.jade.recipeapi.model.Ingredient;
+import com.jade.recipeapi.model.Recipe;
 import com.jade.recipeapi.repo.RecipeRepository;
-import com.jade.recipeapi.Recipe;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,10 +39,54 @@ public class RecipeService {
         return  recipeRepository.save(recipe);
     }
 
+    public Recipe updateRecipe(String id, Recipe updatedRecipe){
+         Optional<Recipe> checkExistence = recipeRepository.findById(id);
+        if(checkExistence.isPresent()){
+            Recipe existingRecipe = checkExistence.get();
+            existingRecipe.setName(updatedRecipe.getName());
+            existingRecipe.setCookTimeMins(updatedRecipe.getCookTimeMins());
+            existingRecipe.setType(updatedRecipe.getType());
+            existingRecipe.setInstructions(updatedRecipe.getInstructions());
+
+            if(!updatedRecipe.getIngredients().isEmpty()) {
+                existingRecipe.getIngredients().clear();
+                List<Ingredient> newIngredients = new ArrayList<>();
+                for (Ingredient ingredient : updatedRecipe.getIngredients()) {
+                    Ingredient managedIngredient = new Ingredient();
+                    managedIngredient.setName(ingredient.getName());
+                    managedIngredient.setMeasurement(ingredient.getMeasurement());
+                    managedIngredient.setUnits(ingredient.getUnits());
+                    managedIngredient.setRecipe(existingRecipe);  
+                    newIngredients.add(managedIngredient);
+                }
+                existingRecipe.getIngredients().addAll(newIngredients);
+            }
+
+
+           return existingRecipe;
+        }
+        throw new RuntimeException("Recipe not found by ID: " + id);   
+    }
+
     public void deleteRecipe(String id){
         recipeRepository.deleteById(id);
     }
 
+      //====================//====================**COOKTIME SORT**====================//====================//====================//====================//====================
+     public Page<Recipe> getRecipesSortedByCookTime(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        List<Recipe> allRecipes = recipeRepository.findAll();
+
+        List<Recipe> sortedRecipes = sortByCookTime(allRecipes);
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), sortedRecipes.size());
+        List<Recipe> pagedRecipes = sortedRecipes.subList(start, end);
+
+        return new PageImpl<>(pagedRecipes, pageable, sortedRecipes.size());
+    }
+    
     public List<Recipe> sortByCookTime(List<Recipe> recipes){
         if(recipes == null || recipes.size() <= 1){
             return recipes;
@@ -85,4 +135,57 @@ public class RecipeService {
 
         return orig;
     }
+    //====================//====================**FILTER RECIPES**====================//====================//====================//====================//====================
+
+    public Page<Recipe> filterByIngredients(List<String> list, int page, int size) {
+        Map<Recipe, Integer> map = new HashMap<>();
+        List<Recipe> sortedRecipes = new ArrayList<>();
+
+        for (Recipe recipe : recipeRepository.findAll()) {
+            int count = this.countIngOccurence(list, recipe);
+            if (count > 0) {
+                map.put(recipe, count); 
+            }
+        }
+        List<Map.Entry<Recipe, Integer>> entryList = new ArrayList<>();
+        for (Map.Entry<Recipe, Integer> entry : map.entrySet()) {
+            entryList.add(entry);
+        }
+
+        entryList.sort(new IngredientPriorityComparator());
+        
+        for (Map.Entry<Recipe, Integer> entry : entryList) {
+            sortedRecipes.add(entry.getKey());
+        }
+        
+        Pageable pageable = PageRequest.of(page, size);
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), sortedRecipes.size());
+        List<Recipe> pagedRecipes = sortedRecipes.subList(start, end);
+    
+        return new PageImpl<>(pagedRecipes, pageable, sortedRecipes.size());
+    }
+    
+
+    private int countIngOccurence(List<String> list, Recipe recipe){
+        int count = 0;
+        if(recipe.getIngredients().isEmpty()){
+            return count;
+        }
+
+        for(Ingredient ingredient : recipe.getIngredients()){
+           for(String name : list){
+            if(ingredient.getName() != null && ingredient
+                .getName()
+                .toLowerCase()
+                .replace(" ", "")
+                .contains(name.toLowerCase().replace(" ", ""))){
+                count++;
+            }
+           }
+        }
+        return count;
+    }
+    
+    
 }

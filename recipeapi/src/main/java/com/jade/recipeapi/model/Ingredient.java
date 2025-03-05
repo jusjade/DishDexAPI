@@ -1,12 +1,18 @@
-package com.jade.recipeapi;
+package com.jade.recipeapi.model;
 
 import jakarta.persistence.*;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @Entity
+@JsonPropertyOrder({"id", "name", "measurement", "units"})
 public class Ingredient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 
     private String name;
@@ -20,11 +26,21 @@ public class Ingredient {
 
     public Ingredient() {} 
 
-    public Ingredient(String name, Double measurement, String units, Recipe recipe) {
-        this.name = name;
-        this.measurement = measurement;
-        this.units = units;
+    @JsonCreator
+    public Ingredient(
+        @JsonProperty("name") String name, 
+        @JsonProperty("measurement") Double measurement, 
+        @JsonProperty("units") String units,
+        Recipe recipe) {
+        this.name = name != null? name : "Untitled Ingredient";
+        this.measurement = measurement != null? measurement : 0.0;
+        this.units = units != null? units : "Unspecified";
         this.recipe = recipe;
+        
+    }
+
+    public Ingredient(String name){
+        this.name = name; 
     }
 
     public Long getId() {
@@ -36,7 +52,7 @@ public class Ingredient {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = name != null? name : "Unknown";
     }
 
     public Double getMeasurement() {
@@ -44,7 +60,7 @@ public class Ingredient {
     }
 
     public void setMeasurement(Double measurement) {
-        this.measurement = measurement;
+        this.measurement = measurement != null? measurement : 0.0;
     }
 
     public String getUnits() {
@@ -52,7 +68,7 @@ public class Ingredient {
     }
 
     public void setUnits(String units) {
-        this.units = units;
+        this.units = units != null? units : "Unspecified";
     }
 
     public Recipe getRecipe() {

@@ -4,16 +4,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.jade.recipeapi.Ingredient;
-import com.jade.recipeapi.Recipe;
+import com.jade.recipeapi.model.Recipe;
 import com.jade.recipeapi.repo.RecipeRepository;
 import com.jade.recipeapi.service.RecipeService;
 
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
-import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,14 +28,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RestController
 @RequestMapping("/api/recipes")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://127.0.0.1:5500")
 public class RecipeController {
     private final RecipeService recipeService;
     private final RecipeRepository recipeRepository;
 
     /* ========================= GET MAPPINGS ============================== */
     @GetMapping
-    public ResponseEntity<org.springframework.data.domain.Page<Recipe>> getRecipes(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                     @RequestParam(value = "size", defaultValue = "10") int size) {
+    public ResponseEntity<org.springframework.data.domain.Page<Recipe>> getRecipes(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+
         return ResponseEntity.ok().body(recipeService.getAllRecipes(page, size));
     }
 
@@ -46,8 +48,18 @@ public class RecipeController {
     }
 
     @GetMapping("/sorted/cookTime")
-    public List<Recipe> getSortedCookTime() {
-        return recipeService.sortByCookTime(recipeRepository.findAll());
+    public ResponseEntity<Page<Recipe>> getSortedCookTime(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        return ResponseEntity.ok(recipeService.getRecipesSortedByCookTime(page, size));
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<Page<Recipe>> filterByIngredients(
+            @RequestParam List<String> ingredients,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        return ResponseEntity.ok(recipeService.filterByIngredients(ingredients, page, size));
     }
 
      /* ========================= POST MAPPINGS ============================== */
@@ -60,27 +72,10 @@ public class RecipeController {
 
      /* ========================= PUT MAPPINGS ============================== */
     @PutMapping("/{id}")
-    public Recipe putMethodName(@PathVariable String id, @RequestBody Recipe updatedRecipe) {
-        Optional<Recipe> checkExistence = recipeRepository.findById(id);
-        if(checkExistence.isPresent()){
-            Recipe existingRecipe = checkExistence.get();
-            existingRecipe.setName(updatedRecipe.getName());
-            existingRecipe.setCookTimeMins(updatedRecipe.getCookTimeMins());
-            existingRecipe.setType(updatedRecipe.getType());
-            existingRecipe.setInstructions(updatedRecipe.getInstructions());
+    public Recipe putRecipe(@PathVariable String id, @RequestBody Recipe updatedRecipe) {
+       Recipe latestRecipe = recipeService.updateRecipe(id, updatedRecipe);
 
-            existingRecipe.getIngredients().clear();
-            for (Ingredient ingredient : updatedRecipe.getIngredients()) {
-            ingredient.setRecipe(existingRecipe);
-            existingRecipe.getIngredients().add(ingredient);
-            }
-
-            existingRecipe.getIngredients().addAll(updatedRecipe.getIngredients());
-            existingRecipe.getIngredients().forEach(ingredient -> ingredient.setRecipe(updatedRecipe));
-
-            return recipeRepository.save(existingRecipe);
-        }
-        throw new RuntimeException("Recipe not found by ID: " + id);   
+       return recipeRepository.save(latestRecipe);
     }
   
     /* ========================= DELETE MAPPINGS ============================== */
