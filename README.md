@@ -1,7 +1,7 @@
 # Dish Dex API
 
 ## Overview
-The DishDex API is a Spring Boot-based RESTful API that allows users to manage recipes. Users can create, retrieve, update, and delete recipes, as well as manage associated ingredients.
+As someone who loves to cook, I wanted to dedicate this ongoing project as a useful and easy-to-use tool to those who like to stay organized with their recipes. The DishDex API is a Spring Boot-based RESTful API that allows users to manage recipes. Users can create, retrieve, update, and delete recipes, as well as manage associated ingredients.
 
 ## Features
 - CRUD operations for Recipes
@@ -39,19 +39,24 @@ recipeapi/
 │   ├── RecipeService.java
 │   ├── IngredientPriorityComparator.java
 │
-├── RecipeapiApplication.java # Main application entry point\
+├── RecipeapiApplication.java # Main application entry point
 ```
 
 ## Setup and Installation
 ### Prerequisites
 Ensure you have the following installed:
 - Java 17 or later
-- Maven
+- Maven (Install manually if needed)
 - PostgreSQL (or any preferred database)
 
 ### Steps to Run Locally
-1. Clone the repository
-2. Configure the database in `application.yml`:
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/your-repo/dishdex-api.git
+   cd dishdex-api
+   ```
+2. Ensure Maven is installed manually if you do not use the Maven wrapper.
+3. Configure the database in `src/main/resources/application.yml`:
    ```yaml
    spring:
        application:
@@ -61,7 +66,7 @@ Ensure you have the following installed:
            username: your_db_user
            password: your_db_password
        jpa:
-           database-platform: org.hibernate.dialect.PostgreSQLInnoDBDialect
+           database-platform: org.hibernate.dialect.PostgreSQLDialect
            generate-ddl: true
            show-sql: true
            hibernate:
@@ -78,7 +83,15 @@ Ensure you have the following installed:
            whitelabel:
                enabled: false
    ```
-3. Build and run the application:
+4. Build the application using Maven:
+   ```sh
+   mvn install
+   ```
+5. Run the application:
+   ```sh
+   java -jar target/*.jar
+   ```
+   or, if using Spring Boot Run:
    ```sh
    mvn spring-boot:run
    ```
@@ -90,7 +103,7 @@ Ensure you have the following installed:
 |--------|------------------------|-------------|
 | GET    | `/api/recipes`         | Get paginated list of recipes |
 | GET    | `/api/recipes/{id}`    | Get a recipe by ID |
-| GET	   | `/api/recipes/filter`	 | Filter recipes based on ingredients|
+| GET    | `/api/recipes/filter`  | Filter recipes based on ingredients|
 | POST   | `/api/recipes`         | Create a new recipe |
 | PUT    | `/api/recipes/{id}`    | Update an existing recipe |
 | DELETE | `/api/recipes/{id}`    | Delete a recipe |
@@ -102,3 +115,4 @@ Ensure you have the following installed:
 | POST   | `/api/ingredients/{recipeId}`     | Add an ingredient to a recipe |
 | PUT    | `/api/ingredients/{ingredientId}` | Update an ingredient |
 | DELETE | `/api/ingredients/{ingredientId}` | Delete an ingredient |
+
