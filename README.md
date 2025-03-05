@@ -8,6 +8,8 @@ The DishDex API is a Spring Boot-based RESTful API that allows users to manage r
 - CRUD operations for Ingredients
 - Sorting recipes by cook time
 - Supports pagination for retrieving recipes
+- Filters recipes by ingredients
+- Implements efficient sorting algorithms for optimized data retrieval
 
 ## Technologies Used
 - Java
@@ -35,8 +37,9 @@ recipeapi/
 ├── service/                  # Business logic services
 │   ├── IngredientService.java
 │   ├── RecipeService.java
+│   ├── IngredientPriorityComparator.java
 │
-├── RecipeapiApplication.java # Main application entry point
+├── RecipeapiApplication.java # Main application entry point\
 ```
 
 ## Setup and Installation
@@ -87,6 +90,7 @@ Ensure you have the following installed:
 |--------|------------------------|-------------|
 | GET    | `/api/recipes`         | Get paginated list of recipes |
 | GET    | `/api/recipes/{id}`    | Get a recipe by ID |
+| GET	   | `/api/recipes/filter`	 | Filter recipes based on ingredients|
 | POST   | `/api/recipes`         | Create a new recipe |
 | PUT    | `/api/recipes/{id}`    | Update an existing recipe |
 | DELETE | `/api/recipes/{id}`    | Delete a recipe |
